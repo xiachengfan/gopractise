@@ -90,11 +90,11 @@ func initOptions(opts ...LogOption) (o *logoptions) {
 	for _, opt := range opts {
 		opt(o)
 	}
-
+	//The default value is stderr
 	if o.output == nil {
 		o.output = os.Stderr
 	}
-
+	//The default value is textFormatter
 	if o.formatter == nil {
 		o.formatter = &TextFormatter{}
 	}
