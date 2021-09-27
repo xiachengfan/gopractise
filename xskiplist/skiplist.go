@@ -1,6 +1,8 @@
 package main
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 const (
 	maxLevel    = 32
@@ -47,6 +49,7 @@ func (z *SortedSet) exist(key string) bool {
 }
 
 func (z *SortedSet) ZAdd(key string, score float64, member string) {
+	//判断有序集合的key是否存在，不存在，则新建
 	if !z.exist(key) {
 		node := &SortedSetNode{
 			dict: make(map[string]*sklNode),
@@ -55,7 +58,9 @@ func (z *SortedSet) ZAdd(key string, score float64, member string) {
 		z.record[key] = node
 	}
 	item := z.record[key]
+	//根据加入的member，先进行hash更改
 	v, ok := item.dict[member]
+	//进行调表更改
 	var node *sklNode
 	if ok {
 		if score != v.score {
@@ -69,6 +74,49 @@ func (z *SortedSet) ZAdd(key string, score float64, member string) {
 		item.dict[member] = node
 
 	}
+}
+
+func (z *SortedSet) ZScore(key string, member string) (ok bool, score float64) {
+	if z.exist(key) {
+		return
+	}
+
+	node, exist := z.record[key].dict[member]
+	if !exist {
+		return
+	}
+	return true, node.score
+}
+func (z *SortedSet) ZCard(key string) int {
+	if !z.exist(key) {
+		return 0
+	}
+	return len(z.record[key].dict)
+}
+func (z *SortedSet) ZRank(key, member string) int64 {
+	if !z.exist(key) {
+		return -1
+	}
+	node, exist := z.record[key].dict[member]
+	if !exist {
+		return -1
+	}
+	rank := z.record[key].skl.sklGetRank(node.score, member)
+	//减去头结点的1
+	rank--
+	return rank
+}
+
+func (z *SortedSet) ZRevRank(key, member string) int64 {
+	if !z.exist(key) {
+		return -1
+	}
+	node, exist := z.record[key].dict[member]
+	if !exist {
+		return -1
+	}
+	rank := z.record[key].skl.sklGetRank(node.score, member)
+	return z.record[key].skl.length - rank
 }
 func sklNewNode(level int16, score float64, member string) *sklNode {
 	node := &sklNode{
