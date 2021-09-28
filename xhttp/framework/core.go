@@ -16,15 +16,13 @@ var _ IGroup = &Core{}
 
 func NewCore() *Core {
 	engine := &Core{router: newRouter()}
-	return &Core{router: newRouter(),
-		RemoteIPHeaders: []string{"X-Forwarded-For", "X-Real-IP"},
-		RGroup: RGroup{
-			Handlers: nil,
-			parent:   "",
-			root:     true,
-			core:     engine,
-		},
+	engine.RGroup = RGroup{
+		Handlers: nil,
+		parent:   "",
+		root:     true,
+		core:     engine,
 	}
+	return engine
 }
 
 func (c *Core) addRoute(method string, pattern string, handler HandlerFunc) {

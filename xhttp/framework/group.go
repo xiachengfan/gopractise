@@ -20,14 +20,18 @@ type RGroup struct {
 }
 
 func (group *RGroup) Group(relativePath string) *RGroup {
-	engine := group.core
 	newGroup := &RGroup{
 		parent: "" + relativePath,
-		core:   engine,
+		core:   group.core,
 	}
 	return newGroup
 }
-
+func NewGroup(core *Core, prefix string) *RGroup {
+	return &RGroup{
+		core:   core,
+		parent: "" + prefix,
+	}
+}
 func (group *RGroup) calculateAbsolutePath(relativePath string) string {
 	return filepath.Join(group.parent, relativePath)
 }
@@ -36,10 +40,9 @@ func (group *RGroup) ParentPath() string {
 	return group.parent
 }
 
-func (group *RGroup) handle(httpMethod, relativePath string, handlers HandlerFunc) IGroup {
+func (group *RGroup) handle(httpMethod, relativePath string, handlers HandlerFunc) {
 	absolutePath := group.calculateAbsolutePath(relativePath)
 	group.core.addRoute(httpMethod, absolutePath, handlers)
-	return group.returnObj()
 }
 
 // 实现Get方法
@@ -63,8 +66,5 @@ func (g *RGroup) Delete(relativePath string, handler HandlerFunc) {
 }
 
 func (group *RGroup) returnObj() IGroup {
-	if group.root {
-		return group.core
-	}
 	return group
 }
